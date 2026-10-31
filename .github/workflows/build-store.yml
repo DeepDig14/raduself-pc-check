@@ -1,0 +1,28 @@
+name: Build Microsoft Store MSIX
+on:
+  push:
+    branches: [store-msix]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Build and validate Store package
+        shell: pwsh
+        run: ./Build-Store.ps1
+      - name: Upload unsigned submission candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: RADUSELF-PC-Check-Store-x64-unsigned
+          path: dist/store/*.msix
+          if-no-files-found: error
+          retention-days: 30

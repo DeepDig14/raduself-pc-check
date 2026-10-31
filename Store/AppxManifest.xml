@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" IgnorableNamespaces="uap rescap">
+  <Identity Name="RaduSelf.RADUSELFPCCheck" Publisher="CN=C930674F-DF76-41E7-BBB2-BC0FD7EBC4E8" Version="0.4.10.0" ProcessorArchitecture="x64" />
+  <Properties><DisplayName>RADUSELF PC Check</DisplayName><PublisherDisplayName>RaduSelf</PublisherDisplayName><Logo>Assets\StoreLogo.png</Logo></Properties>
+  <Resources><Resource Language="ro-RO"/><Resource Language="en-US"/></Resources>
+  <Dependencies><TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.26100.0"/></Dependencies>
+  <Applications><Application Id="App" Executable="RaduSelf.PCCheck.exe" EntryPoint="Windows.FullTrustApplication"><uap:VisualElements DisplayName="RADUSELF PC Check" Description="Windows resource information and maintenance tools" BackgroundColor="#77B5FE" Square150x150Logo="Assets\Square150x150Logo.png" Square44x44Logo="Assets\Square44x44Logo.png" /></Application></Applications>
+  <Capabilities><rescap:Capability Name="runFullTrust"/></Capabilities>
+</Package>

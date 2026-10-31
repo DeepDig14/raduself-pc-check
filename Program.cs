@@ -11,7 +11,12 @@ static class Program
         ApplicationConfiguration.Initialize();
         try
         {
+#if STORE_BUILD
+            bool systemCleanup=false;
+            if(args.Contains("--system-cleanup")) return;
+#else
             bool systemCleanup=args.Contains("--system-cleanup");
+#endif
             if(systemCleanup && !new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
             {
                 MessageBox.Show("Sunt necesare drepturi de administrator / Administrator rights are required.","RADUSELF PC Check");
@@ -340,6 +345,7 @@ sealed class MainWindow : Form
         }
         return lines.Count==0 ? "" : "\n"+string.Join("\n",lines);
     }
+    #if !STORE_BUILD
     void OpenSystemCleanup()
     {
         string? executable=Environment.ProcessPath;
@@ -357,9 +363,11 @@ sealed class MainWindow : Form
             MessageBox.Show(this,T("Cererea de administrator a fost anulată. Nu s-a pornit curățarea.","The administrator request was cancelled. Cleanup was not started."),T("Curățare", "Cleanup"));
         }
     }
+    #endif
     void CleanupPage()
     {
         var p = Page(T("Curățare", "Cleanup"));
+        #if !STORE_BUILD
         if(systemCleanup)
             Note(p,T("Mod administrator: doar Windows TEMP și Prefetch. Nicio ștergere nu pornește automat. Fișierele blocate sau protejate rămân omise; permisiunile nu sunt modificate. Închide această fereastră pentru a reveni la aplicația normală.","Administrator mode: Windows TEMP and Prefetch only. No deletion starts automatically. Locked or protected files are still skipped; permissions are unchanged. Close this window to return to the normal app."));
         else
@@ -367,6 +375,10 @@ sealed class MainWindow : Form
             Note(p,T("Pentru acces la folderele de sistem, poți deschide o fereastră separată cu drepturi de administrator. Windows îți cere acordul sau datele unui administrator. TEMP-ul utilizatorului rămâne în această fereastră.","For access to system folders, you can open a separate administrator window. Windows asks for consent or administrator credentials. User TEMP stays in this window."));
             p.Controls.Add(Button(T("Curățare sistem — administrator", "System cleanup — administrator"),OpenSystemCleanup));
         }
+        #else
+        Note(p,T("Varianta Microsoft Store curăță doar TEMP-ul accesibil al utilizatorului. Pentru alte opțiuni folosește setările Windows.","The Microsoft Store edition cleans accessible user TEMP only. Use Windows settings for other cleanup options."));
+        p.Controls.Add(Button(T("Setări stocare Windows","Windows storage settings"),()=>Open("ms-settings:storagesense")));
+        #endif
         Note(p, T("Ștergerea este definitivă. Închide aplicațiile și salvează lucrul înainte de curățare. TEMP: păstrăm fișierele modificate în ultimele 7 zile. Fișierele blocate, legăturile și elementele fără acces sunt omise. Folderele nu sunt șterse.", "Deletion is permanent. Close applications and save your work first. TEMP: files modified within the last 7 days are kept. Locked files, links and inaccessible items are skipped. Directories are not deleted."));
         void Add(string title, string root, bool prefetch)
         {
@@ -402,10 +414,12 @@ sealed class MainWindow : Form
             p.Controls.Add(clean);
         }
         if(!systemCleanup)Add(T("TEMP utilizator", "User TEMP"), Path.GetTempPath(), false);
+        #if !STORE_BUILD
         var windows = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
         Add("Windows TEMP", Path.Combine(windows, "Temp"), false);
         Note(p, T("Opțiune avansată: Prefetch se curăță separat, doar la cerere. Poate necesita permisiuni suplimentare; accesul refuzat este raportat, nu ocolit.", "Advanced option: Prefetch is cleaned separately, only on request. Additional permissions may be required; denied access is reported, not bypassed."));
         Add("Prefetch", Path.Combine(windows, "Prefetch"), true);
+        #endif
     }
     void PowerControls(FlowLayoutPanel p)
     {
@@ -438,7 +452,9 @@ sealed class MainWindow : Form
         }
         Add(T("Oprește PC-ul", "Shut down PC"), "/s /t 0", false);
         Add(T("Repornește PC-ul", "Restart PC"), "/r /t 0", false);
+        #if !STORE_BUILD
         Add(T("Repornește în BIOS/UEFI", "Restart into BIOS/UEFI"), "/r /fw /t 0", true);
+        #endif
         p.Controls.Add(status);
         p.Controls.Add(Button(T("Deschide setările de Recuperare", "Open Recovery settings"),()=>Open("ms-settings:recovery")));
     }
